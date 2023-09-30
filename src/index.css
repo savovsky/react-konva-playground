@@ -13,6 +13,35 @@ code {
 }
 
 .app-container {
-  padding: 50px;
-  background-color: beige;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+
+}
+
+.app-header {
+    text-align: center;
+}
+
+.app-body {
+    display: flex;
+    justify-content: center;
+}
+
+.tools-container {
+    width: 200px;
+    background-color: bisque;
+}
+
+.canvas-container {
+    width: calc(100% - 500px);
+    max-width: 1500px;
+    min-width: 200px;
+    background-color: aquamarine;
+}
+
+.canvas {
+    border: 1px solid lightgrey;
+    border-radius: 5px;
 }
