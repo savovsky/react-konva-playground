@@ -38,7 +38,7 @@ code {
     width: calc(100% - 500px);
     max-width: 1500px;
     min-width: 200px;
-    background-color: aquamarine;
+    /* background-color: aquamarine; */
 }
 
 .canvas {

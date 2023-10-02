@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Rect } from 'react-konva';
 import Konva from 'konva';
 
-function Rectangular() {
+function RectShape() {
     const [color, setColor] = useState('green');
     const [shadowBlur, setShadowBlur] = useState(0);
 
@@ -20,10 +20,10 @@ function Rectangular() {
 
     return (
         <Rect
-            x={20}
-            y={20}
-            width={50}
-            height={50}
+            x={10}
+            y={10}
+            width={30}
+            height={30}
             fill={color}
             draggable
             shadowBlur={shadowBlur}
@@ -34,4 +34,4 @@ function Rectangular() {
     );
 }
 
-export default Rectangular;
+export default RectShape;
