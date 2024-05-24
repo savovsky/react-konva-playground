@@ -17,6 +17,7 @@ function Canvas() {
 
             if (container) {
                 setWidth(container.offsetWidth);
+                // setHeight(container.offsetHeight);
             }
         };
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useRef } from 'react';
-import { Stage, Layer, Line, Circle } from 'react-konva';
+import { Stage, Layer, Line, Circle, Rect } from 'react-konva';
 import { Box } from '@mui/material';
 
 import {
@@ -26,6 +26,7 @@ type PositionType = {
 type Props = {
     width: number;
     height: number;
+    scale: number;
     tool: string;
     sizePen: number;
     sizeEraser: number;
@@ -36,6 +37,7 @@ type Props = {
 function CanvasContainer({
     width,
     height,
+    scale,
     tool,
     sizePen,
     sizeEraser,
@@ -54,16 +56,18 @@ function CanvasContainer({
         // @ts-ignore
         const pos = e.target.getStage().getPointerPosition();
 
+        // setCursorPosition({ x: pos.x / scale, y: pos.y / scale });
+
         handleOnDraw([
             ...lines,
             {
                 tool,
                 points: [
-                    pos.x,
-                    pos.y,
+                    pos.x / scale,
+                    pos.y / scale,
                     // alows to draw/erase with one click
-                    pos.x - 0.01,
-                    pos.y - 0.01,
+                    (pos.x - 0.01) / scale,
+                    (pos.y - 0.01) / scale,
                 ],
                 size: tool === 'eraser' ? sizeEraser : sizePen,
             },
@@ -75,7 +79,7 @@ function CanvasContainer({
         const stage = e.target.getStage();
         const point = stage.getPointerPosition();
 
-        setCursorPosition({ x: point.x, y: point.y });
+        setCursorPosition({ x: point.x / scale, y: point.y / scale });
 
         // no drawing - skipping
         if (!isDrawing.current) {
@@ -113,9 +117,8 @@ function CanvasContainer({
                     },
                 },
                 cursor: 'none',
-                background: 'grey',
-                width,
-                height,
+                width: '100%',
+                height: '100%',
             }}
         >
             <Stage
@@ -126,7 +129,18 @@ function CanvasContainer({
                 onMouseup={handleMouseUp}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
+                scale={{ x: scale, y: scale }}
             >
+                <Layer>
+                    <Rect
+                        x={0}
+                        y={0}
+                        width={width}
+                        height={height}
+                        fill="lightgrey"
+                    />
+                </Layer>
+
                 <Layer>
                     {lines.map((line, i) => (
                         <Line

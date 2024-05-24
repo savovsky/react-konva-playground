@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState, useRef } from 'react';
 
 import Tools from './Tools';
 import CanvasContainer from './CanvasContainer';
+import useElementSize from '../../../customHooks/useElementSize';
 
 import {
     PEN,
@@ -19,6 +21,8 @@ type LineType = {
 };
 
 function AppBody() {
+    const ref = useRef(null);
+    const { width, height } = useElementSize(ref);
     const [tool, setTool] = useState<string>(DEFAULT_TOOL);
     const [sizePen, setSizePen] = useState<number>(DEFAULT_SIZE_PEN);
     const [sizeEraser, setSizeEraser] = useState<number>(DEFAULT_SIZE_ERASER);
@@ -77,6 +81,11 @@ function AppBody() {
         setLines(items);
     };
 
+    const sceneWidth = 520;
+    const sceneHeight = 435;
+
+    console.log({ width, height, scale: width / sceneWidth });
+
     return (
         <main className="app-body" data-testid="app-body">
             <Tools
@@ -94,24 +103,41 @@ function AppBody() {
             />
             {!isDrawingHidden && isInpaintMode && (
                 <div className="canvas-containers-wrapper">
-                    <CanvasContainer
-                        width={600}
-                        height={600}
-                        tool={tool}
-                        sizePen={sizePen}
-                        sizeEraser={sizeEraser}
-                        lines={lines}
-                        handleOnDraw={handleOnDraw}
-                    />
-                    <CanvasContainer
-                        width={520}
-                        height={435}
-                        tool={tool}
-                        sizePen={sizePen}
-                        sizeEraser={sizeEraser}
-                        lines={lines}
-                        handleOnDraw={handleOnDraw}
-                    />
+                    <div
+                        className="stage-hardcoded"
+                        style={{ width: sceneWidth, height: sceneHeight }}
+                    >
+                        <CanvasContainer
+                            width={sceneWidth}
+                            height={sceneHeight}
+                            scale={1}
+                            tool={tool}
+                            sizePen={sizePen}
+                            sizeEraser={sizeEraser}
+                            lines={lines}
+                            handleOnDraw={handleOnDraw}
+                        />
+                    </div>
+                    <div
+                        ref={ref}
+                        id="stage-responsive"
+                        className="stage-responsive"
+                        style={{
+                            width: width - 20,
+                            height: sceneHeight * (width / sceneWidth),
+                        }}
+                    >
+                        <CanvasContainer
+                            width={width - 20}
+                            height={sceneHeight * (width / sceneWidth)}
+                            scale={width / sceneWidth}
+                            tool={tool}
+                            sizePen={sizePen}
+                            sizeEraser={sizeEraser}
+                            lines={lines}
+                            handleOnDraw={handleOnDraw}
+                        />
+                    </div>
                 </div>
             )}
         </main>
