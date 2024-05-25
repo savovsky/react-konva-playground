@@ -84,8 +84,6 @@ function AppBody() {
     const sceneWidth = 520;
     const sceneHeight = 435;
 
-    console.log({ width, height, scale: width / sceneWidth });
-
     return (
         <main className="app-body" data-testid="app-body">
             <Tools
@@ -120,15 +118,14 @@ function AppBody() {
                     </div>
                     <div
                         ref={ref}
-                        id="stage-responsive"
                         className="stage-responsive"
                         style={{
-                            width: width - 20,
+                            width,
                             height: sceneHeight * (width / sceneWidth),
                         }}
                     >
                         <CanvasContainer
-                            width={width - 20}
+                            width={width}
                             height={sceneHeight * (width / sceneWidth)}
                             scale={width / sceneWidth}
                             tool={tool}

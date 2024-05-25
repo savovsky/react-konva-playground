@@ -97,7 +97,9 @@ function Tools({
                                     onChangeSize(value as number)
                                 }
                                 disabled={isDrawingHidden}
-                                color={tool === PEN ? 'primary' : 'secondary'}
+                                color={
+                                    tool === ERASER ? 'primary' : 'secondary'
+                                }
                             />
                         </Box>
                     </>

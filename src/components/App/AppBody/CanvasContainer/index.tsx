@@ -54,22 +54,20 @@ function CanvasContainer({
     const handleMouseDown = (e: unknown) => {
         isDrawing.current = true;
         // @ts-ignore
-        const pos = e.target.getStage().getPointerPosition();
-
-        // setCursorPosition({ x: pos.x / scale, y: pos.y / scale });
+        const point = e.target.getStage().getPointerPosition();
 
         handleOnDraw([
             ...lines,
             {
                 tool,
                 points: [
-                    pos.x / scale,
-                    pos.y / scale,
+                    point.x / scale,
+                    point.y / scale,
                     // alows to draw/erase with one click
-                    (pos.x - 0.01) / scale,
-                    (pos.y - 0.01) / scale,
+                    (point.x - 0.01) / scale,
+                    (point.y - 0.01) / scale,
                 ],
-                size: tool === 'eraser' ? sizeEraser : sizePen,
+                size: tool === ERASER ? sizeEraser : sizePen,
             },
         ]);
     };
@@ -87,7 +85,10 @@ function CanvasContainer({
         }
         const lastLine = lines[lines.length - 1];
         // add point
-        lastLine.points = lastLine.points.concat([point.x, point.y]);
+        lastLine.points = lastLine.points.concat([
+            point.x / scale,
+            point.y / scale,
+        ]);
 
         // replace last
         lines.splice(lines.length - 1, 1, lastLine);
@@ -96,8 +97,6 @@ function CanvasContainer({
     const handleMouseUp = () => {
         isDrawing.current = false;
     };
-
-    const handleMouseEnter = () => {};
 
     const handleMouseLeave = () => {
         setCursorPosition({ x: -100, y: -100 });
@@ -113,7 +112,7 @@ function CanvasContainer({
                     },
                     // Layer - Circle
                     '&:nth-of-type(2)': {
-                        opacity: tool === ERASER ? 'initial' : CANVAS_OPACITY,
+                        opacity: CANVAS_OPACITY,
                     },
                 },
                 cursor: 'none',
@@ -127,7 +126,6 @@ function CanvasContainer({
                 onMouseDown={handleMouseDown}
                 onMousemove={handleMouseMove}
                 onMouseup={handleMouseUp}
-                onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 scale={{ x: scale, y: scale }}
             >
@@ -147,7 +145,7 @@ function CanvasContainer({
                             // eslint-disable-next-line react/no-array-index-key
                             key={i}
                             points={line.points}
-                            stroke="pink"
+                            stroke={COLOR_PEN}
                             strokeWidth={line.size}
                             tension={0.5}
                             lineCap="round"
