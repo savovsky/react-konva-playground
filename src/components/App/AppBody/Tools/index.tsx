@@ -9,6 +9,7 @@ import {
     Slider,
     FormControlLabel,
     Switch,
+    Checkbox,
 } from '@mui/material';
 
 import { PEN, ERASER } from '../../../../utils/const';
@@ -19,12 +20,14 @@ type Props = {
     isDrawingHidden: boolean;
     hasDrawing: boolean;
     isInpaintMode: boolean;
+    hasCrosshair: boolean;
     handleOnChangeTool: Function;
     handleOnClickClear: Function;
     handleOnClickUndo: Function;
     handleOnChangeSize: Function;
     handleOnChangeIsDrawingHidden: Function;
     handleOnClickToggleMode: Function;
+    handleOnChangeHasCrosshair: Function;
 };
 
 function Tools({
@@ -33,12 +36,14 @@ function Tools({
     isDrawingHidden,
     hasDrawing,
     isInpaintMode,
+    hasCrosshair,
     handleOnChangeTool,
     handleOnClickClear,
     handleOnClickUndo,
     handleOnChangeSize,
     handleOnChangeIsDrawingHidden,
     handleOnClickToggleMode,
+    handleOnChangeHasCrosshair,
 }: Props) {
     const onChangeTool = (event: SelectChangeEvent<unknown>) => {
         const id = event.target.value as string;
@@ -66,6 +71,10 @@ function Tools({
         handleOnClickToggleMode();
     };
 
+    const onChangeHasCrosshair = () => {
+        handleOnChangeHasCrosshair();
+    };
+
     return (
         <Box className="tools-container" data-testid="tools-container">
             <Box sx={{ width: '200px' }}>
@@ -90,7 +99,7 @@ function Tools({
                                 aria-label="Tool size slider"
                                 defaultValue={0}
                                 value={size}
-                                min={0}
+                                min={1}
                                 max={80}
                                 step={1}
                                 onChange={(_, value) =>
@@ -110,8 +119,8 @@ function Tools({
                 <Box
                     sx={{
                         display: 'flex',
-                        justifyContent: 'space-around',
-                        width: '450px',
+                        justifyContent: 'space-between',
+                        width: '500px',
                     }}
                 >
                     <Button
@@ -129,7 +138,18 @@ function Tools({
                     </Button>
 
                     <FormControlLabel
-                        value="top"
+                        disabled={isDrawingHidden}
+                        control={
+                            <Checkbox
+                                checked={hasCrosshair}
+                                onChange={onChangeHasCrosshair}
+                                color="secondary"
+                            />
+                        }
+                        label="Crosshair"
+                    />
+
+                    <FormControlLabel
                         control={
                             <Switch
                                 checked={!isDrawingHidden}
@@ -138,6 +158,7 @@ function Tools({
                         }
                         label={isDrawingHidden ? 'Show Mask' : 'Hide Mask'}
                         labelPlacement="end"
+                        sx={{ width: '150px' }}
                     />
                 </Box>
             )}

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useRef } from 'react';
-import { Stage, Layer, Line, Circle, Rect } from 'react-konva';
-import { Box } from '@mui/material';
+import { Stage, Layer, Line, Circle, Group } from 'react-konva';
 
 import {
     CANVAS_OPACITY,
@@ -32,6 +31,7 @@ type Props = {
     sizeEraser: number;
     lines: Array<LineType>;
     handleOnDraw: Function;
+    hasCrosshair: boolean;
 };
 
 function CanvasContainer({
@@ -43,6 +43,7 @@ function CanvasContainer({
     sizeEraser,
     lines,
     handleOnDraw,
+    hasCrosshair,
 }: Props) {
     const isDrawing = useRef(false);
 
@@ -103,73 +104,69 @@ function CanvasContainer({
     };
 
     return (
-        <Box
-            sx={{
-                canvas: {
-                    // Layer - Line
-                    '&:nth-of-type(1)': {
-                        opacity: CANVAS_OPACITY,
-                    },
-                    // Layer - Circle
-                    '&:nth-of-type(2)': {
-                        opacity: CANVAS_OPACITY,
-                    },
-                },
-                cursor: 'none',
-                width: '100%',
-                height: '100%',
-            }}
+        <Stage
+            width={width}
+            height={height}
+            onMouseDown={handleMouseDown}
+            onMousemove={handleMouseMove}
+            onMouseup={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            scale={{ x: scale, y: scale }}
         >
-            <Stage
-                width={width}
-                height={height}
-                onMouseDown={handleMouseDown}
-                onMousemove={handleMouseMove}
-                onMouseup={handleMouseUp}
-                onMouseLeave={handleMouseLeave}
-                scale={{ x: scale, y: scale }}
-            >
-                <Layer>
-                    <Rect
-                        x={0}
-                        y={0}
-                        width={width}
-                        height={height}
-                        fill="lightgrey"
+            <Layer>
+                {lines.map((line, i) => (
+                    <Line
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={i}
+                        points={line.points}
+                        stroke={COLOR_PEN}
+                        strokeWidth={line.size}
+                        tension={0.5}
+                        lineCap="round"
+                        lineJoin="round"
+                        globalCompositeOperation={
+                            line.tool === ERASER
+                                ? 'destination-out'
+                                : 'source-over'
+                        }
                     />
-                </Layer>
+                ))}
+            </Layer>
 
-                <Layer>
-                    {lines.map((line, i) => (
+            <Layer>
+                <Circle
+                    x={cursorPosition.x}
+                    y={cursorPosition.y}
+                    radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
+                    fill={tool === PEN ? COLOR_PEN : COLOR_ERASER}
+                    opacity={tool === PEN ? CANVAS_OPACITY : 1}
+                />
+                {hasCrosshair && (
+                    <Group>
                         <Line
-                            // eslint-disable-next-line react/no-array-index-key
-                            key={i}
-                            points={line.points}
+                            points={[
+                                cursorPosition.x,
+                                -100,
+                                cursorPosition.x,
+                                height + 100,
+                            ]}
                             stroke={COLOR_PEN}
-                            strokeWidth={line.size}
-                            tension={0.5}
-                            lineCap="round"
-                            lineJoin="round"
-                            globalCompositeOperation={
-                                line.tool === ERASER
-                                    ? 'destination-out'
-                                    : 'source-over'
-                            }
+                            strokeWidth={0.3}
                         />
-                    ))}
-                </Layer>
-
-                <Layer>
-                    <Circle
-                        x={cursorPosition.x}
-                        y={cursorPosition.y}
-                        radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
-                        fill={tool === PEN ? COLOR_PEN : COLOR_ERASER}
-                        opacity={tool === PEN ? CANVAS_OPACITY : 1}
-                    />
-                </Layer>
-            </Stage>
-        </Box>
+                        <Line
+                            points={[
+                                -100,
+                                cursorPosition.y,
+                                width + 100,
+                                cursorPosition.y,
+                            ]}
+                            stroke={COLOR_PEN}
+                            strokeWidth={0.3}
+                        />
+                    </Group>
+                )}
+            </Layer>
+        </Stage>
     );
 }
 
