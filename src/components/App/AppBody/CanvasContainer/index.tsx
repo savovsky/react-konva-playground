@@ -9,7 +9,6 @@ import {
     CANVAS_OPACITY,
     PEN,
     ERASER,
-    COLOR_PEN,
     COLOR_ERASER,
 } from '../../../../utils/const';
 
@@ -31,6 +30,7 @@ type Props = {
     tool: string;
     sizePen: number;
     sizeEraser: number;
+    color: string;
     lines: Array<LineType>;
     handleOnDraw: Function;
     hasCrosshair: boolean;
@@ -46,6 +46,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
         tool,
         sizePen,
         sizeEraser,
+        color,
         lines,
         handleOnDraw,
         hasCrosshair,
@@ -122,12 +123,13 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             scale={{ x: scale, y: scale }}
         >
             <Layer>
+                {/* Drawing from PEN (free drawing) */}
                 {lines.map((line, i) => (
                     <Line
                         // eslint-disable-next-line react/no-array-index-key
                         key={i}
                         points={line.points}
-                        stroke={COLOR_PEN}
+                        stroke={color}
                         strokeWidth={line.size}
                         tension={0.5}
                         lineCap="round"
@@ -142,13 +144,18 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             </Layer>
 
             <Layer>
-                <Circle
-                    x={cursorPosition.x}
-                    y={cursorPosition.y}
-                    radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
-                    fill={tool === PEN ? COLOR_PEN : COLOR_ERASER}
-                    opacity={CANVAS_OPACITY + 0.2}
-                />
+                {/* Pointer for PEN (free drawing) and ERASER */}
+                {(tool === PEN || tool === ERASER) && (
+                    <Circle
+                        x={cursorPosition.x}
+                        y={cursorPosition.y}
+                        radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
+                        fill={tool === ERASER ? COLOR_ERASER : color}
+                        opacity={CANVAS_OPACITY + 0.3}
+                    />
+                )}
+
+                {/* Crosshair */}
                 {hasCrosshair && (
                     <>
                         <Line
@@ -158,7 +165,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
                                 cursorPosition.x,
                                 height + offsetFromCanvas,
                             ]}
-                            stroke={tool === PEN ? COLOR_PEN : COLOR_ERASER}
+                            stroke={tool === ERASER ? COLOR_ERASER : color}
                             strokeWidth={0.5 / scale}
                         />
                         <Line
@@ -168,7 +175,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
                                 width + offsetFromCanvas,
                                 cursorPosition.y,
                             ]}
-                            stroke={tool === PEN ? COLOR_PEN : COLOR_ERASER}
+                            stroke={tool === ERASER ? COLOR_ERASER : color}
                             strokeWidth={0.5 / scale}
                         />
                     </>

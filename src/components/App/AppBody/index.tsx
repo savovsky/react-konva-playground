@@ -11,12 +11,14 @@ import { transformImageToMask } from '../../../utils/imageUtils';
 
 import {
     PEN,
+    RECT,
+    ERASER,
     DEFAULT_TOOL,
     DEFAULT_SIZE_PEN,
-    ERASER,
     DEFAULT_SIZE_ERASER,
     DEFAULT_IS_DRAWING_HIDDEN,
     CANVAS_OPACITY,
+    COLOR_PEN,
 } from '../../../utils/const';
 
 type LineType = {
@@ -34,6 +36,8 @@ function AppBody() {
     const [sizeEraser, setSizeEraser] = useState<number>(DEFAULT_SIZE_ERASER);
     const [isInpaintMode, setIsInpaintMode] = useState<boolean>(true);
     const [hasCrosshair, setHasCrosshair] = useState<boolean>(false);
+    const [isColorPickerOpen, setIsColorPickerOpen] = useState<boolean>(false);
+    const [color, setColor] = useState<string>(COLOR_PEN);
     const [isDrawingHidden, setIsDrawingHidden] = useState<boolean>(
         DEFAULT_IS_DRAWING_HIDDEN,
     );
@@ -49,6 +53,10 @@ function AppBody() {
 
     const handleOnChangeTool = (id: string) => {
         setTool(id);
+
+        if (id === RECT) {
+            setHasCrosshair(true);
+        }
     };
 
     const handleOnChangeSize = (value: number) => {
@@ -95,6 +103,16 @@ function AppBody() {
         setHasCrosshair(!hasCrosshair);
     };
 
+    const handleOnClickColorPicker = () => {
+        setIsColorPickerOpen(true);
+    };
+
+    const handleOnColorChange = (selectedColor: { hex: string }) => {
+        console.log(selectedColor);
+        setColor(selectedColor.hex);
+        setIsColorPickerOpen(false);
+    };
+
     const handleOnClickLogBase64 = async () => {
         if (canvasStageRef.current) {
             const stage = canvasStageRef.current;
@@ -135,6 +153,8 @@ function AppBody() {
                 hasDrawing={!!lines.length}
                 isInpaintMode={isInpaintMode}
                 hasCrosshair={hasCrosshair}
+                isColorPickerOpen={isColorPickerOpen}
+                color={color}
                 handleOnChangeTool={handleOnChangeTool}
                 handleOnClickClear={handleOnClickClear}
                 handleOnClickUndo={handleOnClickUndo}
@@ -143,6 +163,8 @@ function AppBody() {
                 handleOnClickToggleMode={handleOnClickToggleMode}
                 handleOnChangeHasCrosshair={handleOnChangeHasCrosshair}
                 handleOnClickLogBase64={handleOnClickLogBase64}
+                handleOnClickColorPicker={handleOnClickColorPicker}
+                handleOnColorChange={handleOnColorChange}
             />
             {isInpaintMode && (
                 <div className="canvas-containers-wrapper">
@@ -170,6 +192,7 @@ function AppBody() {
                                 tool={tool}
                                 sizePen={sizePen}
                                 sizeEraser={sizeEraser}
+                                color={color}
                                 lines={lines}
                                 handleOnDraw={handleOnDraw}
                                 hasCrosshair={hasCrosshair}
@@ -203,6 +226,7 @@ function AppBody() {
                                 tool={tool}
                                 sizePen={sizePen}
                                 sizeEraser={sizeEraser}
+                                color={color}
                                 lines={lines}
                                 handleOnDraw={handleOnDraw}
                                 hasCrosshair={hasCrosshair}

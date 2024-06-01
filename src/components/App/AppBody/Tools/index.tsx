@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import React from 'react';
+import { SketchPicker } from 'react-color';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
 import {
     Box,
     Select,
@@ -10,9 +12,10 @@ import {
     FormControlLabel,
     Switch,
     Checkbox,
+    IconButton,
 } from '@mui/material';
 
-import { PEN, ERASER } from '../../../../utils/const';
+import { PEN, RECT, ERASER } from '../../../../utils/const';
 
 type Props = {
     tool: string;
@@ -21,6 +24,8 @@ type Props = {
     hasDrawing: boolean;
     isInpaintMode: boolean;
     hasCrosshair: boolean;
+    isColorPickerOpen: boolean;
+    color: string;
     handleOnChangeTool: Function;
     handleOnClickClear: Function;
     handleOnClickUndo: Function;
@@ -29,6 +34,8 @@ type Props = {
     handleOnClickToggleMode: Function;
     handleOnChangeHasCrosshair: Function;
     handleOnClickLogBase64: Function;
+    handleOnClickColorPicker: Function;
+    handleOnColorChange: Function;
 };
 
 function Tools({
@@ -38,6 +45,8 @@ function Tools({
     hasDrawing,
     isInpaintMode,
     hasCrosshair,
+    isColorPickerOpen,
+    color,
     handleOnChangeTool,
     handleOnClickClear,
     handleOnClickUndo,
@@ -46,6 +55,8 @@ function Tools({
     handleOnClickToggleMode,
     handleOnChangeHasCrosshair,
     handleOnClickLogBase64,
+    handleOnClickColorPicker,
+    handleOnColorChange,
 }: Props) {
     const onChangeTool = (event: SelectChangeEvent<unknown>) => {
         const id = event.target.value as string;
@@ -81,45 +92,87 @@ function Tools({
         handleOnClickLogBase64();
     };
 
+    const onClickColorPicker = () => {
+        handleOnClickColorPicker();
+    };
+
+    const onColorChange = (selectedColor: { hex: string }) => {
+        handleOnColorChange(selectedColor);
+    };
+
     return (
         <Box className="tools-container" data-testid="tools-container">
-            <Box sx={{ width: '200px' }}>
-                {isInpaintMode && (
-                    <>
-                        <Select
-                            name="tools"
-                            displayEmpty
-                            value={tool}
-                            onChange={onChangeTool}
-                            sx={{ width: '100%' }}
-                            disabled={isDrawingHidden}
-                        >
-                            <MenuItem value={PEN}>Pen</MenuItem>
-                            <MenuItem value={ERASER} disabled={!hasDrawing}>
-                                Eraser
-                            </MenuItem>
-                        </Select>
-
-                        <Box sx={{ width: '100%', margin: '5px 0 0' }}>
-                            <Slider
-                                aria-label="Tool size slider"
-                                defaultValue={0}
-                                value={size}
-                                min={1}
-                                max={80}
-                                step={1}
-                                onChange={(_, value) =>
-                                    onChangeSize(value as number)
-                                }
+            {isInpaintMode && (
+                <Box sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '200px' }}>
+                        <>
+                            <Select
+                                name="tools"
+                                displayEmpty
+                                value={tool}
+                                onChange={onChangeTool}
+                                sx={{ width: '100%' }}
                                 disabled={isDrawingHidden}
-                                color={
-                                    tool === ERASER ? 'primary' : 'secondary'
-                                }
-                            />
-                        </Box>
-                    </>
-                )}
-            </Box>
+                            >
+                                <MenuItem value={PEN}>Pen</MenuItem>
+                                <MenuItem value={RECT}>Rectangle</MenuItem>
+                                <MenuItem value={ERASER} disabled={!hasDrawing}>
+                                    Eraser
+                                </MenuItem>
+                            </Select>
+
+                            <Box sx={{ width: '100%', margin: '5px 0 0' }}>
+                                <Slider
+                                    aria-label="Tool size slider"
+                                    defaultValue={0}
+                                    value={size}
+                                    min={1}
+                                    max={80}
+                                    step={1}
+                                    onChange={(_, value) =>
+                                        onChangeSize(value as number)
+                                    }
+                                    disabled={isDrawingHidden}
+                                    color={
+                                        tool === ERASER
+                                            ? 'primary'
+                                            : 'secondary'
+                                    }
+                                />
+                            </Box>
+                        </>
+                    </Box>
+
+                    <Box sx={{ position: 'relative' }}>
+                        <IconButton
+                            onClick={onClickColorPicker}
+                            disabled={tool === ERASER}
+                        >
+                            <ColorLensIcon sx={{ fontSize: '40px', color }} />
+                        </IconButton>
+
+                        {isColorPickerOpen && (
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    backgroundColor: 'white',
+                                    zIndex: 10,
+                                    top: 0,
+                                    left: 10,
+                                }}
+                            >
+                                <SketchPicker
+                                    color={color}
+                                    disableAlpha
+                                    onChangeComplete={(selectedColor) =>
+                                        onColorChange(selectedColor)
+                                    }
+                                />
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
+            )}
 
             {isInpaintMode && (
                 <Box
@@ -144,7 +197,7 @@ function Tools({
                     </Button>
 
                     <FormControlLabel
-                        disabled={isDrawingHidden}
+                        disabled={isDrawingHidden || tool === RECT}
                         control={
                             <Checkbox
                                 checked={hasCrosshair}

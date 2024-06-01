@@ -5,6 +5,7 @@ export const COLOR_PEN = 'rgb(222, 4, 164)';
 export const COLOR_ERASER = 'white';
 
 export const PEN = 'PEN';
+export const RECT = 'RECT';
 export const ERASER = 'ERASER';
 
 export const DEFAULT_TOOL = PEN;
