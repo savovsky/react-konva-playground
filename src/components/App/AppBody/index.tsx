@@ -13,12 +13,15 @@ import {
     PEN,
     RECT,
     ERASER,
+    DEFAULT_MODE,
     DEFAULT_TOOL,
     DEFAULT_SIZE_PEN,
     DEFAULT_SIZE_ERASER,
     DEFAULT_IS_DRAWING_HIDDEN,
     CANVAS_OPACITY,
     COLOR_PEN,
+    INPAINT,
+    PAINT,
 } from '../../../utils/const';
 
 type LineType = {
@@ -31,6 +34,7 @@ function AppBody() {
     const canvasParentRef = useRef(null);
     const canvasStageRef: ComponentProps<typeof Stage>['ref'] = useRef(null);
     const { width } = useElementSize(canvasParentRef);
+    const [mode, setMode] = useState<string>(DEFAULT_MODE);
     const [tool, setTool] = useState<string>(DEFAULT_TOOL);
     const [sizePen, setSizePen] = useState<number>(DEFAULT_SIZE_PEN);
     const [sizeEraser, setSizeEraser] = useState<number>(DEFAULT_SIZE_ERASER);
@@ -50,6 +54,10 @@ function AppBody() {
         'https://cdn-api-develop.arcanadevs.com/prompt_images/2024/05/30/09/7656-1-1717062024.png';
 
     const [lines, setLines] = useState<Array<LineType>>([]);
+
+    const handleOnChangeMode = (id: string) => {
+        setMode(id);
+    };
 
     const handleOnChangeTool = (id: string) => {
         setTool(id);
@@ -107,6 +115,10 @@ function AppBody() {
         setIsColorPickerOpen(true);
     };
 
+    const handleOnClickAwayColorPicker = () => {
+        setIsColorPickerOpen(false);
+    };
+
     const handleOnColorChange = (selectedColor: { hex: string }) => {
         console.log(selectedColor);
         setColor(selectedColor.hex);
@@ -122,21 +134,26 @@ function AppBody() {
                 pixelRatio: sceneWidth / stage.width(),
             });
 
-            // The default 'mimeType' is  'image/png'
-            // It is crucial for the 'transformImageToMask' logic
-            // No backgound - only drawing
-            const image = await stage.toImage({
-                pixelRatio: sceneWidth / stage.width(),
-            });
+            if (mode === INPAINT) {
+                // The default 'mimeType' is  'image/png'
+                // It is crucial for the 'transformImageToMask' logic
+                // No backgound - only drawing
+                const image = await stage.toImage({
+                    pixelRatio: sceneWidth / stage.width(),
+                });
 
-            const maskBase64 = await transformImageToMask(
-                image as HTMLImageElement,
-                sceneWidth,
-                sceneHeight,
-            );
+                const maskBase64 = await transformImageToMask(
+                    image as HTMLImageElement,
+                    sceneWidth,
+                    sceneHeight,
+                );
 
-            console.log(imageBase64);
-            console.log(maskBase64);
+                console.log(maskBase64);
+            }
+
+            if (mode === PAINT) {
+                console.log(imageBase64);
+            }
         }
     };
 
@@ -147,6 +164,7 @@ function AppBody() {
     return (
         <main className="app-body" data-testid="app-body">
             <Tools
+                mode={mode}
                 tool={tool}
                 size={tool === PEN ? sizePen : sizeEraser}
                 isDrawingHidden={isDrawingHidden}
@@ -155,6 +173,7 @@ function AppBody() {
                 hasCrosshair={hasCrosshair}
                 isColorPickerOpen={isColorPickerOpen}
                 color={color}
+                handleOnChangeMode={handleOnChangeMode}
                 handleOnChangeTool={handleOnChangeTool}
                 handleOnClickClear={handleOnClickClear}
                 handleOnClickUndo={handleOnClickUndo}
@@ -165,6 +184,7 @@ function AppBody() {
                 handleOnClickLogBase64={handleOnClickLogBase64}
                 handleOnClickColorPicker={handleOnClickColorPicker}
                 handleOnColorChange={handleOnColorChange}
+                handleOnClickAwayColorPicker={handleOnClickAwayColorPicker}
             />
             {isInpaintMode && (
                 <div className="canvas-containers-wrapper">
