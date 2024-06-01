@@ -1,7 +1,9 @@
+/* eslint-disable react/display-name */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useState, useRef } from 'react';
-import { Stage, Layer, Line, Circle, Group } from 'react-konva';
+
+import React, { ComponentProps, useState, useRef, forwardRef } from 'react';
+import { Stage, Layer, Line, Circle } from 'react-konva';
 
 import {
     CANVAS_OPACITY,
@@ -34,22 +36,27 @@ type Props = {
     hasCrosshair: boolean;
 };
 
-function CanvasContainer({
-    width,
-    height,
-    scale,
-    tool,
-    sizePen,
-    sizeEraser,
-    lines,
-    handleOnDraw,
-    hasCrosshair,
-}: Props) {
+type Ref = ComponentProps<typeof Stage>['ref'];
+
+const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
+    const {
+        width,
+        height,
+        scale,
+        tool,
+        sizePen,
+        sizeEraser,
+        lines,
+        handleOnDraw,
+        hasCrosshair,
+    } = props;
+
     const isDrawing = useRef(false);
+    const offsetFromCanvas = 100;
 
     const [cursorPosition, setCursorPosition] = useState<PositionType>({
-        x: -100,
-        y: -100,
+        x: -offsetFromCanvas,
+        y: -offsetFromCanvas,
     });
 
     const handleMouseDown = (e: unknown) => {
@@ -100,11 +107,12 @@ function CanvasContainer({
     };
 
     const handleMouseLeave = () => {
-        setCursorPosition({ x: -100, y: -100 });
+        setCursorPosition({ x: -offsetFromCanvas, y: -offsetFromCanvas });
     };
 
     return (
         <Stage
+            ref={canvasStageRef}
             width={width}
             height={height}
             onMouseDown={handleMouseDown}
@@ -139,35 +147,35 @@ function CanvasContainer({
                     y={cursorPosition.y}
                     radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
                     fill={tool === PEN ? COLOR_PEN : COLOR_ERASER}
-                    opacity={tool === PEN ? CANVAS_OPACITY : 1}
+                    opacity={CANVAS_OPACITY + 0.2}
                 />
                 {hasCrosshair && (
-                    <Group>
+                    <>
                         <Line
                             points={[
                                 cursorPosition.x,
-                                -100,
+                                -offsetFromCanvas,
                                 cursorPosition.x,
-                                height + 100,
+                                height + offsetFromCanvas,
                             ]}
-                            stroke={COLOR_PEN}
-                            strokeWidth={0.3}
+                            stroke={tool === PEN ? COLOR_PEN : COLOR_ERASER}
+                            strokeWidth={0.5 / scale}
                         />
                         <Line
                             points={[
-                                -100,
+                                -offsetFromCanvas,
                                 cursorPosition.y,
-                                width + 100,
+                                width + offsetFromCanvas,
                                 cursorPosition.y,
                             ]}
-                            stroke={COLOR_PEN}
-                            strokeWidth={0.3}
+                            stroke={tool === PEN ? COLOR_PEN : COLOR_ERASER}
+                            strokeWidth={0.5 / scale}
                         />
-                    </Group>
+                    </>
                 )}
             </Layer>
         </Stage>
     );
-}
+});
 
 export default CanvasContainer;

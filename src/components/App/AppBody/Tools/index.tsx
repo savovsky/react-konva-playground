@@ -28,6 +28,7 @@ type Props = {
     handleOnChangeIsDrawingHidden: Function;
     handleOnClickToggleMode: Function;
     handleOnChangeHasCrosshair: Function;
+    handleOnClickLogBase64: Function;
 };
 
 function Tools({
@@ -44,6 +45,7 @@ function Tools({
     handleOnChangeIsDrawingHidden,
     handleOnClickToggleMode,
     handleOnChangeHasCrosshair,
+    handleOnClickLogBase64,
 }: Props) {
     const onChangeTool = (event: SelectChangeEvent<unknown>) => {
         const id = event.target.value as string;
@@ -73,6 +75,10 @@ function Tools({
 
     const onChangeHasCrosshair = () => {
         handleOnChangeHasCrosshair();
+    };
+
+    const onClickLogBase64 = () => {
+        handleOnClickLogBase64();
     };
 
     return (
@@ -163,13 +169,29 @@ function Tools({
                 </Box>
             )}
 
-            <Button
-                variant={isInpaintMode ? 'outlined' : 'contained'}
-                onClick={onClickToggleMode}
-                sx={{ width: '100px', marginLeft: '100px' }}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    marginLeft: '100px',
+                    alignItems: 'end',
+                }}
             >
-                {isInpaintMode ? 'exit' : 'inpaint'}
-            </Button>
+                <Button
+                    variant={isInpaintMode ? 'outlined' : 'contained'}
+                    onClick={onClickToggleMode}
+                    sx={{
+                        display: 'block',
+                        width: '100px',
+                        marginBottom: '15px',
+                    }}
+                >
+                    {isInpaintMode ? 'exit' : 'inpaint'}
+                </Button>
+                <Button variant="contained" onClick={onClickLogBase64}>
+                    log base64
+                </Button>
+            </Box>
         </Box>
     );
 }

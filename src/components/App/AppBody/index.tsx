@@ -1,10 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useRef } from 'react';
+/* eslint-disable no-console */
+
+import React, { ComponentProps, useState, useRef } from 'react';
 import { Box } from '@mui/material';
+import { Stage } from 'react-konva';
 
 import Tools from './Tools';
 import CanvasContainer from './CanvasContainer';
 import useElementSize from '../../../customHooks/useElementSize';
+import { transformImageToMask } from '../../../utils/imageUtils';
 
 import {
     PEN,
@@ -23,8 +26,9 @@ type LineType = {
 };
 
 function AppBody() {
-    const ref = useRef(null);
-    const { width, height } = useElementSize(ref);
+    const canvasParentRef = useRef(null);
+    const canvasStageRef: ComponentProps<typeof Stage>['ref'] = useRef(null);
+    const { width } = useElementSize(canvasParentRef);
     const [tool, setTool] = useState<string>(DEFAULT_TOOL);
     const [sizePen, setSizePen] = useState<number>(DEFAULT_SIZE_PEN);
     const [sizeEraser, setSizeEraser] = useState<number>(DEFAULT_SIZE_ERASER);
@@ -34,17 +38,12 @@ function AppBody() {
         DEFAULT_IS_DRAWING_HIDDEN,
     );
 
+    // source image dimensions (use retrieveImageDimensions)
     const sceneWidth = 520;
     const sceneHeight = 435;
+
     const imageSrc =
         'https://cdn-api-develop.arcanadevs.com/prompt_images/2024/05/30/09/7656-1-1717062024.png';
-
-    // console.log({
-    //     width,
-    //     height,
-    //     scaleWidth: width / sceneWidth,
-    //     scaleHeight: height / sceneHeight,
-    // });
 
     const [lines, setLines] = useState<Array<LineType>>([]);
 
@@ -96,6 +95,33 @@ function AppBody() {
         setHasCrosshair(!hasCrosshair);
     };
 
+    const handleOnClickLogBase64 = async () => {
+        if (canvasStageRef.current) {
+            const stage = canvasStageRef.current;
+
+            // The default 'mimeType' is  'image/png'
+            const imageBase64 = stage.toDataURL({
+                pixelRatio: sceneWidth / stage.width(),
+            });
+
+            // The default 'mimeType' is  'image/png'
+            // It is crucial for the 'transformImageToMask' logic
+            // No backgound - only drawing
+            const image = await stage.toImage({
+                pixelRatio: sceneWidth / stage.width(),
+            });
+
+            const maskBase64 = await transformImageToMask(
+                image as HTMLImageElement,
+                sceneWidth,
+                sceneHeight,
+            );
+
+            console.log(imageBase64);
+            console.log(maskBase64);
+        }
+    };
+
     const handleOnDraw = (items: Array<LineType>) => {
         setLines(items);
     };
@@ -116,6 +142,7 @@ function AppBody() {
                 handleOnChangeIsDrawingHidden={handleOnChangeIsDrawingHidden}
                 handleOnClickToggleMode={handleOnClickToggleMode}
                 handleOnChangeHasCrosshair={handleOnChangeHasCrosshair}
+                handleOnClickLogBase64={handleOnClickLogBase64}
             />
             {isInpaintMode && (
                 <div className="canvas-containers-wrapper">
@@ -128,7 +155,7 @@ function AppBody() {
                             height: sceneHeight,
                             margin: '0 15px 0 0',
                             canvas: {
-                                // Layer - Line
+                                // Layer - Line (the mask === the drawing)
                                 '&:nth-of-type(1)': {
                                     opacity: CANVAS_OPACITY,
                                 },
@@ -146,11 +173,12 @@ function AppBody() {
                                 lines={lines}
                                 handleOnDraw={handleOnDraw}
                                 hasCrosshair={hasCrosshair}
+                                ref={canvasStageRef}
                             />
                         )}
                     </Box>
                     <Box
-                        ref={ref}
+                        ref={canvasParentRef}
                         sx={{
                             flex: 1,
                             cursor: isDrawingHidden ? 'default' : 'none',
@@ -160,7 +188,7 @@ function AppBody() {
                             height: sceneHeight * (width / sceneWidth),
                             overflowY: 'auto',
                             canvas: {
-                                // Layer - Line
+                                // Layer - Line (the mask === the drawing)
                                 '&:nth-of-type(1)': {
                                     opacity: CANVAS_OPACITY,
                                 },
@@ -178,6 +206,7 @@ function AppBody() {
                                 lines={lines}
                                 handleOnDraw={handleOnDraw}
                                 hasCrosshair={hasCrosshair}
+                                ref={canvasStageRef}
                             />
                         )}
                     </Box>
