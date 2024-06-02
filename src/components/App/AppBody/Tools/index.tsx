@@ -164,7 +164,6 @@ function Tools({
                                         onChangeSize(value as number)
                                     }
                                     disabled={isDrawingHidden}
-                                    // color={tool === ERASER ? 'primary' : 'secondary'}
                                     sx={{
                                         '.MuiSlider-track': {
                                             border: '1px solid lightgrey',
@@ -184,6 +183,10 @@ function Tools({
                                         '.MuiSlider-rail': {
                                             color: 'grey',
                                         },
+
+                                        '&.Mui-disabled': {
+                                            opacity: 0.4,
+                                        },
                                     }}
                                 />
                             )}
@@ -195,8 +198,18 @@ function Tools({
                     <IconButton
                         onClick={onClickColorPicker}
                         disabled={tool === ERASER}
+                        sx={{
+                            '&.Mui-disabled': {
+                                opacity: 0.4,
+                            },
+                        }}
                     >
-                        <ColorLensIcon sx={{ fontSize: '40px', color }} />
+                        <ColorLensIcon
+                            sx={{
+                                fontSize: '40px',
+                                color,
+                            }}
+                        />
                     </IconButton>
 
                     {isColorPickerOpen && (

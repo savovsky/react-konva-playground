@@ -16,3 +16,6 @@ export const DEFAULT_TOOL = PEN;
 export const DEFAULT_SIZE_PEN = 30;
 export const DEFAULT_SIZE_ERASER = 30;
 export const DEFAULT_IS_DRAWING_HIDDEN = false;
+
+export const IMG_URL =
+    'https://cdn-api-develop.arcanadevs.com/prompt_images/2024/05/30/09/7656-1-1717062024.png';

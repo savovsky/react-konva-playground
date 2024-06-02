@@ -10,6 +10,7 @@ import useElementSize from '../../../customHooks/useElementSize';
 import { transformImageToMask } from '../../../utils/imageUtils';
 
 import {
+    IMG_URL,
     PEN,
     RECT,
     ERASER,
@@ -28,6 +29,7 @@ type LineType = {
     tool: string;
     points: number[];
     size: number;
+    color: string;
 };
 
 function AppBody() {
@@ -48,10 +50,7 @@ function AppBody() {
 
     // source image dimensions (use retrieveImageDimensions)
     const sceneWidth = 520;
-    const sceneHeight = 435;
-
-    const imageSrc =
-        'https://cdn-api-develop.arcanadevs.com/prompt_images/2024/05/30/09/7656-1-1717062024.png';
+    const sceneHeight = 432;
 
     const [lines, setLines] = useState<Array<LineType>>([]);
 
@@ -215,15 +214,15 @@ function AppBody() {
                             !isToolsActive || isDrawingHidden
                                 ? 'default'
                                 : 'none',
-                        backgroundImage: `url(${imageSrc})`,
+                        backgroundImage: `url(${IMG_URL})`,
                         backgroundSize: 'cover',
                         width: sceneWidth,
                         height: sceneHeight,
                         margin: '0 15px 0 0',
                         canvas: {
-                            // Layer - Line (the mask === the drawing)
-                            '&:nth-of-type(1)': {
-                                opacity: CANVAS_OPACITY,
+                            // Layer - Drawing from PEN (free line)
+                            '&:nth-of-type(2)': {
+                                opacity: mode === INPAINT ? CANVAS_OPACITY : 1,
                             },
                         },
                     }}
@@ -240,6 +239,7 @@ function AppBody() {
                             lines={lines}
                             handleOnDraw={handleOnDraw}
                             hasCrosshair={hasCrosshair}
+                            mode={mode}
                             ref={canvasStageRef}
                         />
                     )}
@@ -252,15 +252,15 @@ function AppBody() {
                             !isToolsActive || isDrawingHidden
                                 ? 'default'
                                 : 'none',
-                        backgroundImage: `url(${imageSrc})`,
+                        backgroundImage: `url(${IMG_URL})`,
                         backgroundSize: 'cover',
                         width,
                         height: sceneHeight * (width / sceneWidth),
                         overflowY: 'auto',
                         canvas: {
-                            // Layer - Line (the mask === the drawing)
-                            '&:nth-of-type(1)': {
-                                opacity: CANVAS_OPACITY,
+                            // Layer - Drawing from PEN (free line)
+                            '&:nth-of-type(2)': {
+                                opacity: mode === INPAINT ? CANVAS_OPACITY : 1,
                             },
                         },
                     }}
@@ -277,6 +277,7 @@ function AppBody() {
                             lines={lines}
                             handleOnDraw={handleOnDraw}
                             hasCrosshair={hasCrosshair}
+                            mode={mode}
                             ref={canvasStageRef}
                         />
                     )}

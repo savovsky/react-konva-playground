@@ -3,19 +3,23 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import React, { ComponentProps, useState, useRef, forwardRef } from 'react';
-import { Stage, Layer, Line, Circle } from 'react-konva';
+import { Stage, Layer, Line, Circle, Image } from 'react-konva';
+import useImage from 'use-image';
 
 import {
     CANVAS_OPACITY,
     PEN,
     ERASER,
     COLOR_ERASER,
+    IMG_URL,
+    PAINT,
 } from '../../../../utils/const';
 
 type LineType = {
     tool: string;
     points: number[];
     size: number;
+    color: string;
 };
 
 type PositionType = {
@@ -34,6 +38,7 @@ type Props = {
     lines: Array<LineType>;
     handleOnDraw: Function;
     hasCrosshair: boolean;
+    mode: string;
 };
 
 type Ref = ComponentProps<typeof Stage>['ref'];
@@ -50,9 +55,11 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
         lines,
         handleOnDraw,
         hasCrosshair,
+        mode,
     } = props;
 
     const isDrawing = useRef(false);
+    const [image] = useImage(IMG_URL, 'anonymous');
     const offsetFromCanvas = 100;
 
     const [cursorPosition, setCursorPosition] = useState<PositionType>({
@@ -77,6 +84,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
                     (point.y - 0.01) / scale,
                 ],
                 size: tool === ERASER ? sizeEraser : sizePen,
+                color,
             },
         ]);
     };
@@ -122,14 +130,26 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             onMouseLeave={handleMouseLeave}
             scale={{ x: scale, y: scale }}
         >
+            {/* The order of the layers is the order of zIndex-es of the layers */}
             <Layer>
-                {/* Drawing from PEN (free drawing) */}
+                {mode === PAINT && (
+                    <Image
+                        image={image}
+                        width={width}
+                        height={height}
+                        scale={{ x: 1 / scale, y: 1 / scale }}
+                    />
+                )}
+            </Layer>
+
+            <Layer>
+                {/* Drawing from PEN (free line) */}
                 {lines.map((line, i) => (
                     <Line
                         // eslint-disable-next-line react/no-array-index-key
                         key={i}
                         points={line.points}
-                        stroke={color}
+                        stroke={line.color}
                         strokeWidth={line.size}
                         tension={0.5}
                         lineCap="round"
@@ -144,7 +164,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             </Layer>
 
             <Layer>
-                {/* Pointer for PEN (free drawing) and ERASER */}
+                {/* Pointer for PEN (free line) and ERASER */}
                 {(tool === PEN || tool === ERASER) && (
                     <Circle
                         x={cursorPosition.x}
@@ -152,6 +172,8 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
                         radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
                         fill={tool === ERASER ? COLOR_ERASER : color}
                         opacity={CANVAS_OPACITY + 0.3}
+                        stroke="black"
+                        strokeWidth={mode === PAINT ? 0.3 / scale : 0}
                     />
                 )}
 
