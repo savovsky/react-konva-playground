@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 import React, { ComponentProps, useState, useRef } from 'react';
-import { Box } from '@mui/material';
+import { Box, Fade, Button } from '@mui/material';
 import { Stage } from 'react-konva';
 
 import Tools from './Tools';
@@ -38,7 +38,7 @@ function AppBody() {
     const [tool, setTool] = useState<string>(DEFAULT_TOOL);
     const [sizePen, setSizePen] = useState<number>(DEFAULT_SIZE_PEN);
     const [sizeEraser, setSizeEraser] = useState<number>(DEFAULT_SIZE_ERASER);
-    const [isInpaintMode, setIsInpaintMode] = useState<boolean>(true);
+    const [isToolsActive, setIsToolsActive] = useState<boolean>(false);
     const [hasCrosshair, setHasCrosshair] = useState<boolean>(false);
     const [isColorPickerOpen, setIsColorPickerOpen] = useState<boolean>(false);
     const [color, setColor] = useState<string>(COLOR_PEN);
@@ -95,7 +95,7 @@ function AppBody() {
     };
 
     const handleOnClickToggleMode = () => {
-        if (isInpaintMode) {
+        if (isToolsActive) {
             // Resseting the state
             setLines([]);
             setTool(DEFAULT_TOOL);
@@ -104,7 +104,7 @@ function AppBody() {
             setIsDrawingHidden(DEFAULT_IS_DRAWING_HIDDEN);
         }
 
-        setIsInpaintMode(!isInpaintMode);
+        setIsToolsActive(!isToolsActive);
     };
 
     const handleOnChangeHasCrosshair = () => {
@@ -163,99 +163,125 @@ function AppBody() {
 
     return (
         <main className="app-body" data-testid="app-body">
-            <Tools
-                mode={mode}
-                tool={tool}
-                size={tool === PEN ? sizePen : sizeEraser}
-                isDrawingHidden={isDrawingHidden}
-                hasDrawing={!!lines.length}
-                isInpaintMode={isInpaintMode}
-                hasCrosshair={hasCrosshair}
-                isColorPickerOpen={isColorPickerOpen}
-                color={color}
-                handleOnChangeMode={handleOnChangeMode}
-                handleOnChangeTool={handleOnChangeTool}
-                handleOnClickClear={handleOnClickClear}
-                handleOnClickUndo={handleOnClickUndo}
-                handleOnChangeSize={handleOnChangeSize}
-                handleOnChangeIsDrawingHidden={handleOnChangeIsDrawingHidden}
-                handleOnClickToggleMode={handleOnClickToggleMode}
-                handleOnChangeHasCrosshair={handleOnChangeHasCrosshair}
-                handleOnClickLogBase64={handleOnClickLogBase64}
-                handleOnClickColorPicker={handleOnClickColorPicker}
-                handleOnColorChange={handleOnColorChange}
-                handleOnClickAwayColorPicker={handleOnClickAwayColorPicker}
-            />
-            {isInpaintMode && (
-                <div className="canvas-containers-wrapper">
-                    <Box
-                        sx={{
-                            cursor: isDrawingHidden ? 'default' : 'none',
-                            backgroundImage: `url(${imageSrc})`,
-                            backgroundSize: 'cover',
-                            width: sceneWidth,
-                            height: sceneHeight,
-                            margin: '0 15px 0 0',
-                            canvas: {
-                                // Layer - Line (the mask === the drawing)
-                                '&:nth-of-type(1)': {
-                                    opacity: CANVAS_OPACITY,
-                                },
-                            },
-                        }}
+            {!isToolsActive && (
+                <Box sx={{ height: '110px' }}>
+                    <Button
+                        variant="contained"
+                        onClick={handleOnClickToggleMode}
                     >
-                        {!isDrawingHidden && (
-                            <CanvasContainer
-                                width={sceneWidth}
-                                height={sceneHeight}
-                                scale={1}
-                                tool={tool}
-                                sizePen={sizePen}
-                                sizeEraser={sizeEraser}
-                                color={color}
-                                lines={lines}
-                                handleOnDraw={handleOnDraw}
-                                hasCrosshair={hasCrosshair}
-                                ref={canvasStageRef}
-                            />
-                        )}
-                    </Box>
-                    <Box
-                        ref={canvasParentRef}
-                        sx={{
-                            flex: 1,
-                            cursor: isDrawingHidden ? 'default' : 'none',
-                            backgroundImage: `url(${imageSrc})`,
-                            backgroundSize: 'cover',
-                            width,
-                            height: sceneHeight * (width / sceneWidth),
-                            overflowY: 'auto',
-                            canvas: {
-                                // Layer - Line (the mask === the drawing)
-                                '&:nth-of-type(1)': {
-                                    opacity: CANVAS_OPACITY,
-                                },
-                            },
-                        }}
-                    >
-                        {!isDrawingHidden && (
-                            <CanvasContainer
-                                width={width}
-                                height={sceneHeight * (width / sceneWidth)}
-                                scale={width / sceneWidth}
-                                tool={tool}
-                                sizePen={sizePen}
-                                sizeEraser={sizeEraser}
-                                color={color}
-                                lines={lines}
-                                handleOnDraw={handleOnDraw}
-                                hasCrosshair={hasCrosshair}
-                                ref={canvasStageRef}
-                            />
-                        )}
-                    </Box>
-                </div>
+                        {isToolsActive ? 'exit' : 'draw'}
+                    </Button>
+                </Box>
             )}
+            <Fade in={isToolsActive} timeout={500}>
+                <Box>
+                    {isToolsActive && (
+                        <Tools
+                            mode={mode}
+                            tool={tool}
+                            size={tool === PEN ? sizePen : sizeEraser}
+                            isDrawingHidden={isDrawingHidden}
+                            hasDrawing={!!lines.length}
+                            hasCrosshair={hasCrosshair}
+                            isColorPickerOpen={isColorPickerOpen}
+                            color={color}
+                            handleOnChangeMode={handleOnChangeMode}
+                            handleOnChangeTool={handleOnChangeTool}
+                            handleOnClickClear={handleOnClickClear}
+                            handleOnClickUndo={handleOnClickUndo}
+                            handleOnChangeSize={handleOnChangeSize}
+                            handleOnChangeIsDrawingHidden={
+                                handleOnChangeIsDrawingHidden
+                            }
+                            handleOnClickToggleMode={handleOnClickToggleMode}
+                            handleOnChangeHasCrosshair={
+                                handleOnChangeHasCrosshair
+                            }
+                            handleOnClickLogBase64={handleOnClickLogBase64}
+                            handleOnClickColorPicker={handleOnClickColorPicker}
+                            handleOnColorChange={handleOnColorChange}
+                            handleOnClickAwayColorPicker={
+                                handleOnClickAwayColorPicker
+                            }
+                        />
+                    )}
+                </Box>
+            </Fade>
+
+            <div className="canvas-containers-wrapper">
+                <Box
+                    sx={{
+                        cursor:
+                            !isToolsActive || isDrawingHidden
+                                ? 'default'
+                                : 'none',
+                        backgroundImage: `url(${imageSrc})`,
+                        backgroundSize: 'cover',
+                        width: sceneWidth,
+                        height: sceneHeight,
+                        margin: '0 15px 0 0',
+                        canvas: {
+                            // Layer - Line (the mask === the drawing)
+                            '&:nth-of-type(1)': {
+                                opacity: CANVAS_OPACITY,
+                            },
+                        },
+                    }}
+                >
+                    {isToolsActive && !isDrawingHidden && (
+                        <CanvasContainer
+                            width={sceneWidth}
+                            height={sceneHeight}
+                            scale={1}
+                            tool={tool}
+                            sizePen={sizePen}
+                            sizeEraser={sizeEraser}
+                            color={color}
+                            lines={lines}
+                            handleOnDraw={handleOnDraw}
+                            hasCrosshair={hasCrosshair}
+                            ref={canvasStageRef}
+                        />
+                    )}
+                </Box>
+                <Box
+                    ref={canvasParentRef}
+                    sx={{
+                        flex: 1,
+                        cursor:
+                            !isToolsActive || isDrawingHidden
+                                ? 'default'
+                                : 'none',
+                        backgroundImage: `url(${imageSrc})`,
+                        backgroundSize: 'cover',
+                        width,
+                        height: sceneHeight * (width / sceneWidth),
+                        overflowY: 'auto',
+                        canvas: {
+                            // Layer - Line (the mask === the drawing)
+                            '&:nth-of-type(1)': {
+                                opacity: CANVAS_OPACITY,
+                            },
+                        },
+                    }}
+                >
+                    {isToolsActive && !isDrawingHidden && (
+                        <CanvasContainer
+                            width={width}
+                            height={sceneHeight * (width / sceneWidth)}
+                            scale={width / sceneWidth}
+                            tool={tool}
+                            sizePen={sizePen}
+                            sizeEraser={sizeEraser}
+                            color={color}
+                            lines={lines}
+                            handleOnDraw={handleOnDraw}
+                            hasCrosshair={hasCrosshair}
+                            ref={canvasStageRef}
+                        />
+                    )}
+                </Box>
+            </div>
         </main>
     );
 }

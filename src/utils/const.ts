@@ -13,6 +13,6 @@ export const PAINT = 'PAINT';
 
 export const DEFAULT_MODE = 'INPAINT';
 export const DEFAULT_TOOL = PEN;
-export const DEFAULT_SIZE_PEN = 40;
-export const DEFAULT_SIZE_ERASER = 40;
+export const DEFAULT_SIZE_PEN = 30;
+export const DEFAULT_SIZE_ERASER = 30;
 export const DEFAULT_IS_DRAWING_HIDDEN = false;

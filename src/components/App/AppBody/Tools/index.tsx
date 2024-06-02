@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+
 import React from 'react';
 import { SketchPicker } from 'react-color';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
@@ -25,7 +26,6 @@ type Props = {
     size: number;
     isDrawingHidden: boolean;
     hasDrawing: boolean;
-    isInpaintMode: boolean;
     hasCrosshair: boolean;
     isColorPickerOpen: boolean;
     color: string;
@@ -49,7 +49,6 @@ function Tools({
     size,
     isDrawingHidden,
     hasDrawing,
-    isInpaintMode,
     hasCrosshair,
     isColorPickerOpen,
     color,
@@ -119,194 +118,217 @@ function Tools({
     };
 
     return (
-        <Box className="tools-container" data-testid="tools-container">
-            {!isInpaintMode && <Box />}
-            {isInpaintMode && (
-                <>
-                    <Box sx={{ display: 'flex' }}>
-                        <Box sx={{ width: '200px' }}>
-                            <>
-                                <Select
-                                    name="tools"
-                                    value={tool}
-                                    onChange={onChangeTool}
-                                    sx={{ width: '100%' }}
+        <Box
+            data-testid="tools-container"
+            sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                width: '100%',
+                height: '110px',
+            }}
+        >
+            <Box sx={{ display: 'flex', marginRight: '20px' }}>
+                <Box sx={{ width: '200px' }}>
+                    <>
+                        <Select
+                            name="tools"
+                            value={tool}
+                            onChange={onChangeTool}
+                            sx={{ width: '100%' }}
+                            disabled={isDrawingHidden}
+                        >
+                            <MenuItem value={PEN}>Pen</MenuItem>
+                            <MenuItem value={ERASER} disabled={!hasDrawing}>
+                                Eraser
+                            </MenuItem>
+                            <Divider />
+                            <MenuItem value={RECT}>Rectangle</MenuItem>
+                        </Select>
+
+                        <Box
+                            sx={{
+                                width: '100%',
+                                margin: '5px 0 0',
+                            }}
+                        >
+                            {(tool === ERASER || tool === PEN) && (
+                                <Slider
+                                    aria-label="Tool size slider"
+                                    defaultValue={0}
+                                    value={size}
+                                    min={1}
+                                    max={100}
+                                    step={1}
+                                    onChange={(_, value) =>
+                                        onChangeSize(value as number)
+                                    }
                                     disabled={isDrawingHidden}
-                                >
-                                    <MenuItem value={PEN}>Pen</MenuItem>
-                                    <MenuItem
-                                        value={ERASER}
-                                        disabled={!hasDrawing}
-                                    >
-                                        Eraser
-                                    </MenuItem>
-                                    <Divider />
-                                    <MenuItem value={RECT}>Rectangle</MenuItem>
-                                </Select>
+                                    // color={tool === ERASER ? 'primary' : 'secondary'}
+                                    sx={{
+                                        '.MuiSlider-track': {
+                                            border: '1px solid lightgrey',
+                                            background:
+                                                tool === ERASER
+                                                    ? 'white'
+                                                    : color,
+                                        },
 
-                                <Box sx={{ width: '100%', margin: '5px 0 0' }}>
-                                    <Slider
-                                        aria-label="Tool size slider"
-                                        defaultValue={0}
-                                        value={size}
-                                        min={1}
-                                        max={80}
-                                        step={1}
-                                        onChange={(_, value) =>
-                                            onChangeSize(value as number)
-                                        }
-                                        disabled={isDrawingHidden}
-                                        color={
-                                            tool === ERASER
-                                                ? 'primary'
-                                                : 'secondary'
-                                        }
-                                    />
-                                </Box>
-                            </>
-                        </Box>
+                                        '.MuiSlider-thumb': {
+                                            backgroundColor:
+                                                tool === ERASER
+                                                    ? 'white'
+                                                    : color,
+                                        },
 
-                        <Box sx={{ position: 'relative' }}>
-                            <IconButton
-                                onClick={onClickColorPicker}
-                                disabled={tool === ERASER}
-                            >
-                                <ColorLensIcon
-                                    sx={{ fontSize: '40px', color }}
+                                        '.MuiSlider-rail': {
+                                            color: 'grey',
+                                        },
+                                    }}
                                 />
-                            </IconButton>
-
-                            {isColorPickerOpen && (
-                                <ClickAwayListener
-                                    onClickAway={onClickAwayColorPicker}
-                                >
-                                    <Box
-                                        sx={{
-                                            position: 'absolute',
-                                            backgroundColor: 'white',
-                                            zIndex: 10,
-                                            top: 0,
-                                            left: 10,
-                                        }}
-                                    >
-                                        <SketchPicker
-                                            color={color}
-                                            disableAlpha
-                                            onChangeComplete={(selectedColor) =>
-                                                onColorChange(selectedColor)
-                                            }
-                                        />
-                                    </Box>
-                                </ClickAwayListener>
                             )}
                         </Box>
-                    </Box>
+                    </>
+                </Box>
 
-                    <Box
-                        sx={{
-                            width: '500px',
-                            marginRight: '30px',
-                        }}
+                <Box sx={{ position: 'relative' }}>
+                    <IconButton
+                        onClick={onClickColorPicker}
+                        disabled={tool === ERASER}
                     >
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                            }}
-                        >
-                            <Button
-                                onClick={onClickClear}
-                                disabled={isDrawingHidden || !hasDrawing}
-                            >
-                                clear all
-                            </Button>
+                        <ColorLensIcon sx={{ fontSize: '40px', color }} />
+                    </IconButton>
 
-                            <Button
-                                onClick={onClickUndo}
-                                disabled={isDrawingHidden || !hasDrawing}
+                    {isColorPickerOpen && (
+                        <ClickAwayListener onClickAway={onClickAwayColorPicker}>
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    backgroundColor: 'white',
+                                    zIndex: 10,
+                                    top: 0,
+                                    left: 10,
+                                }}
                             >
-                                undo
-                            </Button>
+                                <SketchPicker
+                                    color={color}
+                                    disableAlpha
+                                    onChangeComplete={(selectedColor) =>
+                                        onColorChange(selectedColor)
+                                    }
+                                />
+                            </Box>
+                        </ClickAwayListener>
+                    )}
+                </Box>
+            </Box>
 
-                            <FormControlLabel
-                                disabled={isDrawingHidden || tool === RECT}
-                                control={
-                                    <Checkbox
-                                        checked={hasCrosshair}
-                                        onChange={onChangeHasCrosshair}
-                                        color="secondary"
-                                    />
-                                }
-                                label="Crosshair"
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    minWidth: '220px',
+                }}
+            >
+                <Box sx={{ marginRight: '15px' }}>
+                    <Button
+                        onClick={onClickClear}
+                        disabled={isDrawingHidden || !hasDrawing}
+                    >
+                        clear all
+                    </Button>
+
+                    <Button
+                        onClick={onClickUndo}
+                        disabled={isDrawingHidden || !hasDrawing}
+                    >
+                        undo
+                    </Button>
+                </Box>
+
+                <Box>
+                    <FormControlLabel
+                        disabled={isDrawingHidden || tool === RECT}
+                        control={
+                            <Checkbox
+                                checked={hasCrosshair}
+                                onChange={onChangeHasCrosshair}
+                                sx={{
+                                    '&.Mui-checked': {
+                                        color,
+                                    },
+
+                                    '&.Mui-disabled': {
+                                        opacity: 0.4,
+                                    },
+                                }}
                             />
+                        }
+                        label="Crosshair"
+                    />
 
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={!isDrawingHidden}
-                                        onChange={onChangeIsDrawingHidden}
-                                    />
-                                }
-                                label="Mask"
-                                labelPlacement="end"
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={!isDrawingHidden}
+                                onChange={onChangeIsDrawingHidden}
                             />
-                        </Box>
-
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                width: '100%',
-                                justifyContent: 'center',
-                                margin: '10px 5px 5px',
-                            }}
-                        >
-                            <Select
-                                name="mode"
-                                value={mode}
-                                onChange={onChangeMode}
-                                sx={{ width: '120px' }}
-                                size="small"
-                            >
-                                <MenuItem value={INPAINT}>Inpaint</MenuItem>
-                                <MenuItem value={PAINT}>Paint</MenuItem>
-                            </Select>
-                        </Box>
-                    </Box>
-                </>
-            )}
+                        }
+                        label="Mask"
+                        labelPlacement="end"
+                    />
+                </Box>
+            </Box>
 
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    marginLeft: '100px',
                     alignItems: 'end',
-                    width: '130px',
                 }}
             >
                 <Button
-                    variant={isInpaintMode ? 'outlined' : 'contained'}
+                    variant="outlined"
                     onClick={onClickToggleMode}
                     sx={{
                         display: 'block',
-                        width: '100%',
+                        width: '125px',
                         marginBottom: '15px',
                     }}
                 >
-                    {isInpaintMode ? 'exit' : 'draw'}
+                    exit
                 </Button>
-                {isInpaintMode && (
+
+                <Box
+                    sx={{
+                        display: 'flex',
+                        width: '100%',
+                    }}
+                >
+                    <Select
+                        name="mode"
+                        value={mode}
+                        onChange={onChangeMode}
+                        sx={{ width: '120px', margin: '0 15px' }}
+                        size="small"
+                    >
+                        <MenuItem value={INPAINT}>Inpaint</MenuItem>
+                        <MenuItem value={PAINT}>Paint</MenuItem>
+                    </Select>
+
                     <Button
                         variant="contained"
                         onClick={onClickLogBase64}
                         disabled={!hasDrawing}
                         sx={{
-                            width: '100%',
+                            width: '125px',
                         }}
                     >
                         log base64
                     </Button>
-                )}
+                </Box>
             </Box>
         </Box>
     );
