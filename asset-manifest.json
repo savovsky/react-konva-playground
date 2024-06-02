@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/react-konva-playground/static/css/main.112395ef.css",
-    "main.js": "/react-konva-playground/static/js/main.43e370e9.js",
+    "main.css": "/react-konva-playground/static/css/main.9b851c2c.css",
+    "main.js": "/react-konva-playground/static/js/main.70fc88c3.js",
     "index.html": "/react-konva-playground/index.html",
-    "main.112395ef.css.map": "/react-konva-playground/static/css/main.112395ef.css.map",
-    "main.43e370e9.js.map": "/react-konva-playground/static/js/main.43e370e9.js.map"
+    "main.9b851c2c.css.map": "/react-konva-playground/static/css/main.9b851c2c.css.map",
+    "main.70fc88c3.js.map": "/react-konva-playground/static/js/main.70fc88c3.js.map"
   },
   "entrypoints": [
-    "static/css/main.112395ef.css",
-    "static/js/main.43e370e9.js"
+    "static/css/main.9b851c2c.css",
+    "static/js/main.70fc88c3.js"
   ]
 }
