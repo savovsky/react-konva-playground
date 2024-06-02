@@ -1,21 +1,23 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable react/display-name */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import React, { ComponentProps, useState, useRef, forwardRef } from 'react';
-import { Stage, Layer, Line, Circle, Image } from 'react-konva';
+import { Stage, Layer, Line, Circle, Image, Rect } from 'react-konva';
 import useImage from 'use-image';
 
 import {
     CANVAS_OPACITY,
     PEN,
     ERASER,
+    RECT,
     COLOR_ERASER,
     IMG_URL,
     PAINT,
 } from '../../../../utils/const';
 
-type LineType = {
+type DrawingItem = {
     tool: string;
     points: number[];
     size: number;
@@ -35,7 +37,7 @@ type Props = {
     sizePen: number;
     sizeEraser: number;
     color: string;
-    lines: Array<LineType>;
+    drawings: Array<DrawingItem>;
     handleOnDraw: Function;
     hasCrosshair: boolean;
     mode: string;
@@ -52,7 +54,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
         sizePen,
         sizeEraser,
         color,
-        lines,
+        drawings,
         handleOnDraw,
         hasCrosshair,
         mode,
@@ -72,21 +74,35 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
         // @ts-ignore
         const point = e.target.getStage().getPointerPosition();
 
-        handleOnDraw([
-            ...lines,
-            {
-                tool,
-                points: [
-                    point.x / scale,
-                    point.y / scale,
-                    // alows to draw/erase with one click
-                    (point.x - 0.01) / scale,
-                    (point.y - 0.01) / scale,
-                ],
-                size: tool === ERASER ? sizeEraser : sizePen,
-                color,
-            },
-        ]);
+        if (tool === PEN || tool === ERASER) {
+            handleOnDraw([
+                ...drawings,
+                {
+                    tool,
+                    points: [
+                        point.x / scale,
+                        point.y / scale,
+                        // alows to draw/erase with one click
+                        (point.x - 0.01) / scale,
+                        (point.y - 0.01) / scale,
+                    ],
+                    size: tool === ERASER ? sizeEraser : sizePen,
+                    color,
+                },
+            ]);
+        }
+
+        if (tool === RECT) {
+            handleOnDraw([
+                ...drawings,
+                {
+                    tool,
+                    points: [point.x / scale, point.y / scale],
+                    size: 0,
+                    color,
+                },
+            ]);
+        }
     };
 
     const handleMouseMove = (e: unknown) => {
@@ -100,16 +116,32 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
         if (!isDrawing.current) {
             return;
         }
-        const lastLine = lines[lines.length - 1];
-        // add point
-        lastLine.points = lastLine.points.concat([
-            point.x / scale,
-            point.y / scale,
-        ]);
 
-        // replace last
-        lines.splice(lines.length - 1, 1, lastLine);
-        handleOnDraw(lines.concat());
+        if (tool === PEN || tool === ERASER) {
+            const lastDrawing = drawings[drawings.length - 1];
+            // add point
+            lastDrawing.points = lastDrawing.points.concat([
+                point.x / scale,
+                point.y / scale,
+            ]);
+
+            // replace last
+            drawings.splice(drawings.length - 1, 1, lastDrawing);
+            handleOnDraw(drawings.concat());
+        }
+
+        if (tool === RECT) {
+            const lastDrawing = drawings[drawings.length - 1];
+            // add point
+            lastDrawing.points = lastDrawing.points.concat([
+                point.x / scale,
+                point.y / scale,
+            ]);
+
+            // replace last
+            drawings.splice(drawings.length - 1, 1, lastDrawing);
+            handleOnDraw(drawings.concat());
+        }
     };
     const handleMouseUp = () => {
         isDrawing.current = false;
@@ -143,24 +175,53 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             </Layer>
 
             <Layer>
-                {/* Drawing from PEN (free line) */}
-                {lines.map((line, i) => (
-                    <Line
-                        // eslint-disable-next-line react/no-array-index-key
-                        key={i}
-                        points={line.points}
-                        stroke={line.color}
-                        strokeWidth={line.size}
-                        tension={0.5}
-                        lineCap="round"
-                        lineJoin="round"
-                        globalCompositeOperation={
-                            line.tool === ERASER
-                                ? 'destination-out'
-                                : 'source-over'
-                        }
-                    />
-                ))}
+                {/* Drawings from PEN (free line) */}
+                {drawings
+                    .filter(
+                        (item: DrawingItem) =>
+                            item.tool === PEN || item.tool === ERASER,
+                    )
+                    .map((item: DrawingItem, index: number) => (
+                        <Line
+                            key={index}
+                            points={item.points}
+                            stroke={item.color}
+                            strokeWidth={item.size}
+                            tension={0.5}
+                            lineCap="round"
+                            lineJoin="round"
+                            globalCompositeOperation={
+                                item.tool === ERASER
+                                    ? 'destination-out'
+                                    : 'source-over'
+                            }
+                        />
+                    ))}
+
+                {/* Drawings from RECTANGLE */}
+                {drawings
+                    .filter((item: DrawingItem) => item.tool === RECT)
+                    .map((item: DrawingItem, index: number) => (
+                        <Rect
+                            key={index}
+                            x={item.points[0]}
+                            y={item.points[1]}
+                            width={
+                                item.points[item.points.length - 2] -
+                                item.points[0]
+                            }
+                            height={
+                                item.points[item.points.length - 1] -
+                                item.points[1]
+                            }
+                            fill={item.color}
+                            globalCompositeOperation={
+                                item.tool === ERASER
+                                    ? 'destination-out'
+                                    : 'source-over'
+                            }
+                        />
+                    ))}
             </Layer>
 
             <Layer>

@@ -25,10 +25,10 @@ import {
     PAINT,
 } from '../../../utils/const';
 
-type LineType = {
+type DrawingItem = {
     tool: string;
     points: number[];
-    size: number;
+    size: number; // TODO rename to strokeWidth ?!
     color: string;
 };
 
@@ -52,7 +52,7 @@ function AppBody() {
     const sceneWidth = 520;
     const sceneHeight = 432;
 
-    const [lines, setLines] = useState<Array<LineType>>([]);
+    const [drawings, setDrawings] = useState<Array<DrawingItem>>([]);
 
     const handleOnChangeMode = (id: string) => {
         setMode(id);
@@ -77,16 +77,16 @@ function AppBody() {
     };
 
     const handleOnClickClear = () => {
-        setLines([]);
+        setDrawings([]);
         setTool(PEN);
     };
 
     const handleOnClickUndo = () => {
-        if (lines.length === 1) {
+        if (drawings.length === 1) {
             setTool(PEN);
         }
 
-        setLines(lines.slice(0, -1));
+        setDrawings(drawings.slice(0, -1));
     };
 
     const handleOnChangeIsDrawingHidden = () => {
@@ -96,7 +96,7 @@ function AppBody() {
     const handleOnClickToggleMode = () => {
         if (isToolsActive) {
             // Resseting the state
-            setLines([]);
+            setDrawings([]);
             setTool(DEFAULT_TOOL);
             setSizePen(DEFAULT_SIZE_PEN);
             setSizeEraser(DEFAULT_SIZE_ERASER);
@@ -119,7 +119,7 @@ function AppBody() {
     };
 
     const handleOnColorChange = (selectedColor: { hex: string }) => {
-        console.log(selectedColor);
+        // console.log(selectedColor);
         setColor(selectedColor.hex);
         setIsColorPickerOpen(false);
     };
@@ -156,8 +156,8 @@ function AppBody() {
         }
     };
 
-    const handleOnDraw = (items: Array<LineType>) => {
-        setLines(items);
+    const handleOnDraw = (items: Array<DrawingItem>) => {
+        setDrawings(items);
     };
 
     return (
@@ -180,7 +180,7 @@ function AppBody() {
                             tool={tool}
                             size={tool === PEN ? sizePen : sizeEraser}
                             isDrawingHidden={isDrawingHidden}
-                            hasDrawing={!!lines.length}
+                            hasDrawing={!!drawings.length}
                             hasCrosshair={hasCrosshair}
                             isColorPickerOpen={isColorPickerOpen}
                             color={color}
@@ -236,7 +236,7 @@ function AppBody() {
                             sizePen={sizePen}
                             sizeEraser={sizeEraser}
                             color={color}
-                            lines={lines}
+                            drawings={drawings}
                             handleOnDraw={handleOnDraw}
                             hasCrosshair={hasCrosshair}
                             mode={mode}
@@ -274,7 +274,7 @@ function AppBody() {
                             sizePen={sizePen}
                             sizeEraser={sizeEraser}
                             color={color}
-                            lines={lines}
+                            drawings={drawings}
                             handleOnDraw={handleOnDraw}
                             hasCrosshair={hasCrosshair}
                             mode={mode}

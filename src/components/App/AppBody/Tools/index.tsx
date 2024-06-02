@@ -15,7 +15,6 @@ import {
     Switch,
     Checkbox,
     IconButton,
-    Divider,
 } from '@mui/material';
 
 import { PEN, RECT, ERASER, INPAINT, PAINT } from '../../../../utils/const';
@@ -142,8 +141,7 @@ function Tools({
                             <MenuItem value={ERASER} disabled={!hasDrawing}>
                                 Eraser
                             </MenuItem>
-                            <Divider />
-                            <MenuItem value={RECT}>Rectangle</MenuItem>
+                            {/* <MenuItem value={RECT}>Rectangle</MenuItem> */}
                         </Select>
 
                         <Box
