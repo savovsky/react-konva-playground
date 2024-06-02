@@ -266,15 +266,15 @@ function Tools({
                             <Checkbox
                                 checked={hasCrosshair}
                                 onChange={onChangeHasCrosshair}
-                                sx={{
-                                    '&.Mui-checked': {
-                                        color,
-                                    },
+                                // sx={{
+                                //     '&.Mui-checked': {
+                                //         color,
+                                //     },
 
-                                    '&.Mui-disabled': {
-                                        opacity: 0.4,
-                                    },
-                                }}
+                                //     '&.Mui-disabled': {
+                                //         opacity: 0.4,
+                                //     },
+                                // }}
                             />
                         }
                         label="Crosshair"

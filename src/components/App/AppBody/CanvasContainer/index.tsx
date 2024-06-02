@@ -62,7 +62,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
 
     const isDrawing = useRef(false);
     const [image] = useImage(IMG_URL, 'anonymous');
-    const offsetFromCanvas = 100;
+    const offsetFromCanvas = 500;
 
     const [cursorPosition, setCursorPosition] = useState<PositionType>({
         x: -offsetFromCanvas,
