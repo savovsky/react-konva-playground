@@ -1,7 +1,7 @@
 export const CANVAS_WIDTH = 520;
 export const CANVAS_HEIGHT = 435;
-export const CANVAS_OPACITY = 0.5;
-export const COLOR_PEN = 'rgb(222, 4, 164)';
+export const DEFAULT_OPACITY_MASK_LAYER = 0.5;
+export const DEFAULT_COLOR = 'rgb(222, 4, 164)';
 export const COLOR_ERASER = 'white';
 
 export const PEN = 'PEN';

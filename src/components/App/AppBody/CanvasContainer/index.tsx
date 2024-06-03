@@ -8,13 +8,13 @@ import { Stage, Layer, Line, Circle, Image, Rect } from 'react-konva';
 import useImage from 'use-image';
 
 import {
-    CANVAS_OPACITY,
     PEN,
     ERASER,
     RECT,
     COLOR_ERASER,
     IMG_URL,
     PAINT,
+    DEFAULT_COLOR,
 } from '../../../../utils/const';
 
 type DrawingItem = {
@@ -36,6 +36,7 @@ type Props = {
     tool: string;
     sizePen: number;
     sizeEraser: number;
+    maskOpacity: number;
     color: string;
     drawings: Array<DrawingItem>;
     handleOnDraw: Function;
@@ -53,6 +54,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
         tool,
         sizePen,
         sizeEraser,
+        maskOpacity,
         color,
         drawings,
         handleOnDraw,
@@ -185,7 +187,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
                         <Line
                             key={index}
                             points={item.points}
-                            stroke={item.color}
+                            stroke={mode === PAINT ? item.color : DEFAULT_COLOR}
                             strokeWidth={item.size}
                             tension={0.5}
                             lineCap="round"
@@ -232,7 +234,7 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
                         y={cursorPosition.y}
                         radius={tool === PEN ? sizePen / 2 : sizeEraser / 2}
                         fill={tool === ERASER ? COLOR_ERASER : color}
-                        opacity={CANVAS_OPACITY + 0.3}
+                        opacity={maskOpacity + 0.3}
                         stroke="black"
                         strokeWidth={mode === PAINT ? 0.3 / scale : 0}
                     />

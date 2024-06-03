@@ -4,6 +4,7 @@ import React from 'react';
 import { SketchPicker } from 'react-color';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import { ClickAwayListener } from '@mui/base/ClickAwayListener';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import {
     Box,
     Select,
@@ -17,12 +18,20 @@ import {
     IconButton,
 } from '@mui/material';
 
-import { PEN, RECT, ERASER, INPAINT, PAINT } from '../../../../utils/const';
+import {
+    PEN,
+    RECT,
+    ERASER,
+    INPAINT,
+    PAINT,
+    DEFAULT_COLOR,
+} from '../../../../utils/const';
 
 type Props = {
     mode: string;
     tool: string;
     size: number;
+    maskOpacity: number;
     isDrawingHidden: boolean;
     hasDrawing: boolean;
     hasCrosshair: boolean;
@@ -33,6 +42,7 @@ type Props = {
     handleOnClickClear: Function;
     handleOnClickUndo: Function;
     handleOnChangeSize: Function;
+    handleOnChangeMaskOpacity: Function;
     handleOnChangeIsDrawingHidden: Function;
     handleOnClickToggleMode: Function;
     handleOnChangeHasCrosshair: Function;
@@ -46,6 +56,7 @@ function Tools({
     mode,
     tool,
     size,
+    maskOpacity,
     isDrawingHidden,
     hasDrawing,
     hasCrosshair,
@@ -56,6 +67,7 @@ function Tools({
     handleOnClickClear,
     handleOnClickUndo,
     handleOnChangeSize,
+    handleOnChangeMaskOpacity,
     handleOnChangeIsDrawingHidden,
     handleOnClickToggleMode,
     handleOnChangeHasCrosshair,
@@ -64,6 +76,8 @@ function Tools({
     handleOnColorChange,
     handleOnClickAwayColorPicker,
 }: Props) {
+    const matches = useMediaQuery('(min-width:915px)');
+
     const onChangeMode = (event: SelectChangeEvent<unknown>) => {
         const id = event.target.value as string;
 
@@ -86,6 +100,10 @@ function Tools({
 
     const onChangeSize = (value: number) => {
         handleOnChangeSize(value);
+    };
+
+    const onChangeMaskOpacity = (value: number) => {
+        handleOnChangeMaskOpacity(value);
     };
 
     const onChangeIsDrawingHidden = () => {
@@ -116,6 +134,14 @@ function Tools({
         handleOnColorChange(selectedColor);
     };
 
+    const activeColor = () => {
+        if (mode === INPAINT) {
+            return DEFAULT_COLOR;
+        }
+
+        return color;
+    };
+
     return (
         <Box
             data-testid="tools-container"
@@ -127,8 +153,10 @@ function Tools({
                 height: '110px',
             }}
         >
-            <Box sx={{ display: 'flex', marginRight: '20px' }}>
-                <Box sx={{ width: '200px' }}>
+            <Box
+                sx={{ display: 'flex', marginRight: matches ? '50px' : '0px' }}
+            >
+                <Box sx={{ width: '150px' }}>
                     <>
                         <Select
                             name="tools"
@@ -168,14 +196,14 @@ function Tools({
                                             background:
                                                 tool === ERASER
                                                     ? 'white'
-                                                    : color,
+                                                    : activeColor(),
                                         },
 
                                         '.MuiSlider-thumb': {
                                             backgroundColor:
                                                 tool === ERASER
                                                     ? 'white'
-                                                    : color,
+                                                    : activeColor(),
                                         },
 
                                         '.MuiSlider-rail': {
@@ -195,7 +223,11 @@ function Tools({
                 <Box sx={{ position: 'relative' }}>
                     <IconButton
                         onClick={onClickColorPicker}
-                        disabled={tool === ERASER}
+                        disabled={
+                            tool === ERASER ||
+                            mode === INPAINT ||
+                            isDrawingHidden
+                        }
                         sx={{
                             '&.Mui-disabled': {
                                 opacity: 0.4,
@@ -205,7 +237,12 @@ function Tools({
                         <ColorLensIcon
                             sx={{
                                 fontSize: '40px',
-                                color,
+                                color:
+                                    tool === ERASER ||
+                                    mode === INPAINT ||
+                                    isDrawingHidden
+                                        ? 'unset'
+                                        : color,
                             }}
                         />
                     </IconButton>
@@ -240,10 +277,10 @@ function Tools({
                     justifyContent: 'space-around',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    minWidth: '220px',
+                    minWidth: '180px',
                 }}
             >
-                <Box sx={{ marginRight: '15px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Button
                         onClick={onClickClear}
                         disabled={isDrawingHidden || !hasDrawing}
@@ -254,32 +291,24 @@ function Tools({
                     <Button
                         onClick={onClickUndo}
                         disabled={isDrawingHidden || !hasDrawing}
+                        sx={{ marginRight: '15px' }}
                     >
                         undo
                     </Button>
-                </Box>
 
-                <Box>
                     <FormControlLabel
                         disabled={isDrawingHidden || tool === RECT}
                         control={
                             <Checkbox
                                 checked={hasCrosshair}
                                 onChange={onChangeHasCrosshair}
-                                // sx={{
-                                //     '&.Mui-checked': {
-                                //         color,
-                                //     },
-
-                                //     '&.Mui-disabled': {
-                                //         opacity: 0.4,
-                                //     },
-                                // }}
                             />
                         }
                         label="Crosshair"
                     />
+                </Box>
 
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <FormControlLabel
                         control={
                             <Switch
@@ -289,6 +318,21 @@ function Tools({
                         }
                         label="Mask"
                         labelPlacement="end"
+                    />
+
+                    <Slider
+                        aria-label="Mask opacity slider"
+                        defaultValue={0}
+                        value={maskOpacity}
+                        min={0.2}
+                        max={0.6}
+                        step={0.1}
+                        onChange={(_, value) =>
+                            onChangeMaskOpacity(value as number)
+                        }
+                        disabled={isDrawingHidden || mode === PAINT}
+                        sx={{ width: '80px' }}
+                        size="small"
                     />
                 </Box>
             </Box>

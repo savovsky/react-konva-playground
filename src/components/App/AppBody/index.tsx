@@ -19,8 +19,8 @@ import {
     DEFAULT_SIZE_PEN,
     DEFAULT_SIZE_ERASER,
     DEFAULT_IS_DRAWING_HIDDEN,
-    CANVAS_OPACITY,
-    COLOR_PEN,
+    DEFAULT_OPACITY_MASK_LAYER,
+    DEFAULT_COLOR,
     INPAINT,
     PAINT,
 } from '../../../utils/const';
@@ -43,7 +43,10 @@ function AppBody() {
     const [isToolsActive, setIsToolsActive] = useState<boolean>(false);
     const [hasCrosshair, setHasCrosshair] = useState<boolean>(false);
     const [isColorPickerOpen, setIsColorPickerOpen] = useState<boolean>(false);
-    const [color, setColor] = useState<string>(COLOR_PEN);
+    const [color, setColor] = useState<string>(DEFAULT_COLOR);
+    const [maskOpacity, setMaskOpacity] = useState<number>(
+        DEFAULT_OPACITY_MASK_LAYER,
+    );
     const [isDrawingHidden, setIsDrawingHidden] = useState<boolean>(
         DEFAULT_IS_DRAWING_HIDDEN,
     );
@@ -56,6 +59,10 @@ function AppBody() {
 
     const handleOnChangeMode = (id: string) => {
         setMode(id);
+
+        if (id === INPAINT) {
+            setColor(DEFAULT_COLOR);
+        }
     };
 
     const handleOnChangeTool = (id: string) => {
@@ -74,6 +81,10 @@ function AppBody() {
         if (tool === ERASER) {
             setSizeEraser(value);
         }
+    };
+
+    const handleOnChangeMaskOpacity = (value: number) => {
+        setMaskOpacity(value);
     };
 
     const handleOnClickClear = () => {
@@ -125,6 +136,8 @@ function AppBody() {
     };
 
     const handleOnClickLogBase64 = async () => {
+        setIsDrawingHidden(false);
+
         if (canvasStageRef.current) {
             const stage = canvasStageRef.current;
 
@@ -179,6 +192,7 @@ function AppBody() {
                             mode={mode}
                             tool={tool}
                             size={tool === PEN ? sizePen : sizeEraser}
+                            maskOpacity={maskOpacity}
                             isDrawingHidden={isDrawingHidden}
                             hasDrawing={!!drawings.length}
                             hasCrosshair={hasCrosshair}
@@ -189,6 +203,9 @@ function AppBody() {
                             handleOnClickClear={handleOnClickClear}
                             handleOnClickUndo={handleOnClickUndo}
                             handleOnChangeSize={handleOnChangeSize}
+                            handleOnChangeMaskOpacity={
+                                handleOnChangeMaskOpacity
+                            }
                             handleOnChangeIsDrawingHidden={
                                 handleOnChangeIsDrawingHidden
                             }
@@ -222,7 +239,7 @@ function AppBody() {
                         canvas: {
                             // Layer - Drawing from PEN (free line)
                             '&:nth-of-type(2)': {
-                                opacity: mode === INPAINT ? CANVAS_OPACITY : 1,
+                                opacity: mode === INPAINT ? maskOpacity : 1,
                             },
                         },
                     }}
@@ -235,6 +252,7 @@ function AppBody() {
                             tool={tool}
                             sizePen={sizePen}
                             sizeEraser={sizeEraser}
+                            maskOpacity={maskOpacity}
                             color={color}
                             drawings={drawings}
                             handleOnDraw={handleOnDraw}
@@ -260,7 +278,7 @@ function AppBody() {
                         canvas: {
                             // Layer - Drawing from PEN (free line)
                             '&:nth-of-type(2)': {
-                                opacity: mode === INPAINT ? CANVAS_OPACITY : 1,
+                                opacity: mode === INPAINT ? maskOpacity : 1,
                             },
                         },
                     }}
@@ -273,6 +291,7 @@ function AppBody() {
                             tool={tool}
                             sizePen={sizePen}
                             sizeEraser={sizeEraser}
+                            maskOpacity={maskOpacity}
                             color={color}
                             drawings={drawings}
                             handleOnDraw={handleOnDraw}
