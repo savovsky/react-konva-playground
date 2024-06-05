@@ -145,8 +145,14 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             handleOnDraw(drawings.concat());
         }
     };
+
     const handleMouseUp = () => {
         isDrawing.current = false;
+    };
+
+    const handleOnTouchEnd = () => {
+        isDrawing.current = false;
+        setCursorPosition({ x: -offsetFromCanvas, y: -offsetFromCanvas });
     };
 
     const handleMouseLeave = () => {
@@ -163,6 +169,11 @@ const CanvasContainer = forwardRef((props: Props, canvasStageRef: Ref) => {
             onMouseup={handleMouseUp}
             onMouseLeave={handleMouseLeave}
             scale={{ x: scale, y: scale }}
+            onTouchStart={handleMouseDown}
+            onTouchMove={handleMouseMove}
+            onTouchEnd={handleOnTouchEnd}
+            // onTap={handleMouseDown}
+            // onDragMove={handleMouseMove}
         >
             {/* The order of the layers is the order of zIndex-es of the layers */}
             <Layer>
